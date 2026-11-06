@@ -8,6 +8,7 @@ type ApplicationsState = {
   update: (id: string, input: ApplicationInput) => void
   move: (id: string, status: Status) => void
   remove: (id: string) => void
+  replaceAll: (applications: Application[]) => void
 }
 
 // `now` is a parameter so tests can control time instead of depending on the real clock.
@@ -54,6 +55,8 @@ export const useApplications = create<ApplicationsState>()(
         })),
 
       remove: (id) => set((s) => ({ applications: s.applications.filter((a) => a.id !== id) })),
+
+      replaceAll: (applications) => set({ applications }),
     }),
     // The localStorage key. `version` lets us migrate old saved data if the shape changes later.
     { name: 'jobtrackr:applications', version: 1 },

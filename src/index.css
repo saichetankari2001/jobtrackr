@@ -1,1 +1,36 @@
 @import "tailwindcss";
+@import "@fontsource-variable/bricolage-grotesque";
+@import "@fontsource/ibm-plex-sans/400.css";
+@import "@fontsource/ibm-plex-sans/500.css";
+@import "@fontsource/ibm-plex-sans/600.css";
+
+/* Design tokens: every colour and font is defined once here, then used as Tailwind classes
+   (e.g. bg-paper, text-ink, bg-applied). Change a value here and the whole app updates. */
+@theme {
+  --font-display: "Bricolage Grotesque Variable", system-ui, sans-serif;
+  --font-sans: "IBM Plex Sans", system-ui, sans-serif;
+
+  --color-paper: #eef1ec;
+  --color-surface: #ffffff;
+  --color-ink: #1f2a2e;
+  --color-muted: #5b6b70;
+  --color-line: #d5dbd3;
+
+  --color-saved: #64748b;
+  --color-applied: #2b59c3;
+  --color-interview: #b7790a;
+  --color-offer: #2f8f5b;
+  --color-rejected: #b4505a;
+  --color-followup: #c2410c;
+}
+
+body {
+  @apply bg-paper font-sans text-ink antialiased;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+  }
+}
