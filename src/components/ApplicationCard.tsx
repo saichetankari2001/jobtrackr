@@ -1,5 +1,6 @@
 import { useDraggable } from '@dnd-kit/core'
 import { CSS } from '@dnd-kit/utilities'
+import type { KeyboardEvent } from 'react'
 import { daysSince, formatAge, needsFollowUp } from '../lib/dates'
 import type { Application } from '../types/application'
 
@@ -40,8 +41,14 @@ export function CardBody({ app, isOverlay = false }: Props) {
   )
 }
 
-export function ApplicationCard({ app }: Props) {
+export function ApplicationCard({ app, onEdit }: Props & { onEdit: (app: Application) => void }) {
   const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({ id: app.id })
+
+  // Space/arrow keys are used by dnd-kit for moving; Enter opens the card for editing.
+  const onKeyDown = (e: KeyboardEvent<HTMLLIElement>) => {
+    listeners?.onKeyDown?.(e)
+    if (e.key === 'Enter' && !isDragging) onEdit(app)
+  }
 
   return (
     <li
@@ -50,9 +57,12 @@ export function ApplicationCard({ app }: Props) {
       className={`cursor-grab touch-manipulation rounded-lg focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-applied active:cursor-grabbing ${
         isDragging ? 'opacity-40' : ''
       }`}
-      aria-label={`${app.company}, ${app.title}. Press space to move.`}
+      aria-label={`${app.company}, ${app.title}. Press Enter to edit, Space to move.`}
       {...attributes}
       {...listeners}
+      onKeyDown={onKeyDown}
+      // A drag needs 5px of movement first, so a plain click never starts a drag.
+      onClick={() => onEdit(app)}
     >
       <CardBody app={app} />
     </li>

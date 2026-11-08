@@ -3,9 +3,9 @@ import { STATUS_STYLES } from '../lib/statusStyles'
 import { STATUS_LABELS, type Application, type Status } from '../types/application'
 import { ApplicationCard } from './ApplicationCard'
 
-type Props = { status: Status; applications: Application[] }
+type Props = { status: Status; applications: Application[]; onEdit: (app: Application) => void }
 
-export function BoardColumn({ status, applications }: Props) {
+export function BoardColumn({ status, applications, onEdit }: Props) {
   // The column's id IS its status, so on drop we know exactly where the card went.
   const { setNodeRef, isOver } = useDroppable({ id: status })
   const headingId = `col-${status}`
@@ -28,7 +28,7 @@ export function BoardColumn({ status, applications }: Props) {
 
       <ul className="flex min-h-24 flex-1 flex-col gap-2">
         {applications.map((app) => (
-          <ApplicationCard key={app.id} app={app} />
+          <ApplicationCard key={app.id} app={app} onEdit={onEdit} />
         ))}
       </ul>
     </section>

@@ -17,7 +17,9 @@ import { sampleApplications } from '../lib/sampleData'
 import { useApplications } from '../store/applications'
 import { STATUSES, STATUS_LABELS, type Application, type Status } from '../types/application'
 
-export function BoardPage() {
+type Props = { onAdd: () => void; onEdit: (app: Application) => void }
+
+export function BoardPage({ onAdd, onEdit }: Props) {
   const applications = useApplications((s) => s.applications)
   const move = useApplications((s) => s.move)
   const replaceAll = useApplications((s) => s.replaceAll)
@@ -26,7 +28,10 @@ export function BoardPage() {
   const sensors = useSensors(
     useSensor(MouseSensor, { activationConstraint: { distance: 5 } }),
     useSensor(TouchSensor, { activationConstraint: { delay: 200, tolerance: 5 } }),
-    useSensor(KeyboardSensor),
+    // Space picks up/drops a card; Enter is reserved for opening the card to edit.
+    useSensor(KeyboardSensor, {
+      keyboardCodes: { start: ['Space'], cancel: ['Escape'], end: ['Space', 'Enter'] },
+    }),
   )
 
   // Group applications by status once per change, newest first within each column.
@@ -53,13 +58,22 @@ export function BoardPage() {
         <p className="mt-2 text-muted">
           Add the jobs you apply for and JobTrackr will show which ones need a follow-up and which resume gets replies.
         </p>
-        <button
-          type="button"
-          onClick={() => replaceAll(sampleApplications())}
-          className="mt-6 rounded-lg border border-line bg-surface px-4 py-2 font-medium hover:border-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-applied"
-        >
-          Load sample data
-        </button>
+        <div className="mt-6 flex flex-wrap justify-center gap-2">
+          <button
+            type="button"
+            onClick={onAdd}
+            className="rounded-lg bg-ink px-4 py-2 font-medium text-white hover:bg-ink/85 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-applied"
+          >
+            Add your first application
+          </button>
+          <button
+            type="button"
+            onClick={() => replaceAll(sampleApplications())}
+            className="rounded-lg border border-line bg-surface px-4 py-2 font-medium hover:border-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-applied"
+          >
+            Load sample data
+          </button>
+        </div>
       </div>
     )
   }
@@ -97,7 +111,7 @@ export function BoardPage() {
         {/* Phones: columns scroll sideways and snap. Desktop: all five columns fit side by side. */}
         <div className="-mx-4 flex snap-x snap-mandatory gap-3 overflow-x-auto px-4 pb-4 md:mx-0 md:grid md:grid-cols-5 md:overflow-visible md:px-0">
           {STATUSES.map((status) => (
-            <BoardColumn key={status} status={status} applications={byStatus[status]} />
+            <BoardColumn key={status} status={status} applications={byStatus[status]} onEdit={onEdit} />
           ))}
         </div>
 

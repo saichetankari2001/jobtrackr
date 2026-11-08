@@ -8,7 +8,7 @@ describe('BoardPage', () => {
   beforeEach(() => useApplications.setState({ applications: [] }))
 
   it('shows an empty state, then the board after loading sample data', async () => {
-    render(<BoardPage />)
+    render(<BoardPage onAdd={() => {}} onEdit={() => {}} />)
     expect(screen.getByText('No applications yet')).toBeInTheDocument()
 
     await userEvent.click(screen.getByRole('button', { name: 'Load sample data' }))
@@ -20,7 +20,7 @@ describe('BoardPage', () => {
   })
 
   it('flags old applications that still need a follow-up', async () => {
-    render(<BoardPage />)
+    render(<BoardPage onAdd={() => {}} onEdit={() => {}} />)
     await userEvent.click(screen.getByRole('button', { name: 'Load sample data' }))
     // Canva (21 days) and REA Group (18 days) are still in Applied.
     expect(screen.getAllByText('Follow up')).toHaveLength(2)
