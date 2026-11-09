@@ -32,7 +32,7 @@ const emptyInput = (): ApplicationInput => ({
 })
 
 const inputClass =
-  'mt-1 block w-full rounded-lg border border-line bg-surface px-3 py-2 text-sm placeholder:text-muted/70 focus:border-applied focus:outline-2 focus:outline-applied/30 aria-invalid:border-rejected'
+  'mt-1 block w-full rounded-lg border border-line bg-surface px-3 py-2 text-sm placeholder:text-muted/70 focus:border-applied focus:outline-2 focus:outline-applied/30 aria-invalid:border-danger'
 
 export function ApplicationForm({ initial, resumeVersions, onSubmit, onCancel, onDelete }: Props) {
   const isEdit = Boolean(initial)
@@ -115,7 +115,7 @@ export function ApplicationForm({ initial, resumeVersions, onSubmit, onCancel, o
 
       <div className="flex flex-wrap items-center gap-2 pt-2 sm:col-span-2">
         {isEdit && onDelete && (
-          <button type="button" onClick={onDelete} className="rounded-lg px-3 py-2 text-sm font-medium text-rejected hover:bg-rejected/10 focus-visible:outline-2 focus-visible:outline-rejected">
+          <button type="button" onClick={onDelete} className="rounded-lg px-3 py-2 text-sm font-medium text-danger hover:bg-danger/10 focus-visible:outline-2 focus-visible:outline-danger">
             Delete
           </button>
         )}
@@ -163,7 +163,7 @@ function Field({
         </p>
       )}
       {error && (
-        <p id={errorId} className="mt-1 text-xs font-medium text-rejected">
+        <p id={errorId} className="mt-1 text-xs font-medium text-danger">
           {error.message}
         </p>
       )}

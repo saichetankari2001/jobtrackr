@@ -1,8 +1,11 @@
-import { useMemo, useState } from 'react'
+import { lazy, Suspense, useMemo, useState } from 'react'
 import { NavLink, Route, Routes } from 'react-router-dom'
 import { ApplicationForm } from './components/ApplicationForm'
 import { Modal } from './components/Modal'
 import { BoardPage } from './pages/BoardPage'
+
+// Code splitting: the charting library is large, so Insights is downloaded only when visited.
+const InsightsPage = lazy(() => import('./pages/InsightsPage').then((m) => ({ default: m.InsightsPage })))
 import { useApplications } from './store/applications'
 import type { Application, ApplicationInput } from './types/application'
 
@@ -69,7 +72,14 @@ function App() {
       <main className="mx-auto max-w-7xl px-4 py-6">
         <Routes>
           <Route path="/" element={<BoardPage onAdd={openAdd} onEdit={openEdit} />} />
-          <Route path="/insights" element={<p className="text-muted">Insights are coming in a later step.</p>} />
+          <Route
+            path="/insights"
+            element={
+              <Suspense fallback={<p className="text-muted">Loading insights…</p>}>
+                <InsightsPage />
+              </Suspense>
+            }
+          />
         </Routes>
       </main>
 
