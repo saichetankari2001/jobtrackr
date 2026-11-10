@@ -1,6 +1,7 @@
 import { lazy, Suspense, useMemo, useState } from 'react'
 import { NavLink, Route, Routes } from 'react-router-dom'
 import { ApplicationForm } from './components/ApplicationForm'
+import { DataControls } from './components/DataControls'
 import { Modal } from './components/Modal'
 import { BoardPage } from './pages/BoardPage'
 
@@ -82,6 +83,8 @@ function App() {
           />
         </Routes>
       </main>
+
+      <DataControls />
 
       <Modal open={editing !== null} onClose={close} title={editing?.mode === 'edit' ? 'Edit application' : 'Add application'}>
         {editing && (
