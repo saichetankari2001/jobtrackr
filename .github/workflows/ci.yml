@@ -1,0 +1,35 @@
+# Continuous integration: every push and pull request is linted, tested and built on a clean machine.
+# The AWS deploy job will be added after `build` once hosting is set up.
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+# Least privilege: this workflow only needs to read the code.
+permissions:
+  contents: read
+
+# If a newer commit is pushed, cancel the older run instead of wasting minutes.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      # `npm ci` installs exactly what package-lock.json says, so CI matches local builds.
+      - run: npm ci
+      - run: npm run lint
+      - run: npm test
+      - run: npm run build

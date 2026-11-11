@@ -1,5 +1,7 @@
 # JobTrackr
 
+[![CI](https://github.com/saichetankari2001/jobtrackr/actions/workflows/ci.yml/badge.svg)](https://github.com/saichetankari2001/jobtrackr/actions/workflows/ci.yml)
+
 A job application tracker that helps you learn from your job search, not just record it. Move applications across a Kanban board, get flagged when one needs a follow-up, and see which resume version and which kinds of roles actually lead to interviews.
 
 I built it for my own graduate job search: my inbox told me *what* happened to each application, but never *why*.
@@ -30,6 +32,7 @@ I built it for my own graduate job search: my inbox told me *what* happened to e
 | Drag and drop | dnd-kit | Maintained, and supports keyboard and screen readers |
 | Charts | Recharts, lazy-loaded | Only downloaded when Insights is opened |
 | Testing | Vitest + Testing Library | 32 unit and component tests, including full user flows |
+| CI | GitHub Actions | Every push is linted, tested and built on a clean machine |
 
 ## Engineering decisions worth calling out
 
