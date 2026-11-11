@@ -2,6 +2,7 @@ import { lazy, Suspense, useMemo, useState } from 'react'
 import { NavLink, Route, Routes } from 'react-router-dom'
 import { ApplicationForm } from './components/ApplicationForm'
 import { DataControls } from './components/DataControls'
+import { FollowUpDraft } from './components/FollowUpDraft'
 import { Modal } from './components/Modal'
 import { BoardPage } from './pages/BoardPage'
 
@@ -87,6 +88,7 @@ function App() {
       <DataControls />
 
       <Modal open={editing !== null} onClose={close} title={editing?.mode === 'edit' ? 'Edit application' : 'Add application'}>
+        {editing?.mode === 'edit' && editing.app.status === 'applied' && <FollowUpDraft key={`follow-up-${editing.app.id}`} app={editing.app} />}
         {editing && (
           <ApplicationForm
             // A new key resets the form when switching between different applications.

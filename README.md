@@ -14,6 +14,7 @@ I built it for my own graduate job search: my inbox told me *what* happened to e
 - **Follow-up flags.** Anything still in Applied after 14 days is highlighted, so no application goes quiet unnoticed.
 - **Resume version tracking.** Record which tailored resume you sent to each company.
 - **Insights.** Response rate, interview rate, and interview rate by resume version and role type. Small samples are marked so one lucky application doesn't read as "100% success".
+- **AI follow-up emails, powered by [Matilda](https://maincode.com/matilda/api).** For an application with no reply, Matilda drafts a short follow-up email you can review and copy. Only the company, role and date are sent; your notes never leave the browser.
 - **Backup.** Export and import your data as JSON. Imports are validated and merged, never overwritten blindly.
 - **Sample data.** One click loads a realistic board, so you can try it without typing anything.
 
@@ -31,7 +32,8 @@ I built it for my own graduate job search: my inbox told me *what* happened to e
 | Forms | React Hook Form + Zod | One Zod schema is both the TypeScript type and the validation rules |
 | Drag and drop | dnd-kit | Maintained, and supports keyboard and screen readers |
 | Charts | Recharts, lazy-loaded | Only downloaded when Insights is opened |
-| Testing | Vitest + Testing Library | 32 unit and component tests, including full user flows |
+| Testing | Vitest + Testing Library | 43 unit and component tests, including full user flows |
+| AI | Matilda API (`@maincode-ai/matilda-client-sdk`), called server-side | Australian-made model. The API key lives on the server, never in the browser |
 | CI | GitHub Actions | Every push is linted, tested and built on a clean machine |
 
 ## Engineering decisions worth calling out
@@ -42,6 +44,12 @@ I built it for my own graduate job search: my inbox told me *what* happened to e
 - **Timezone-safe dates.** `new Date('2026-11-06')` is parsed as UTC, which in Melbourne (UTC+11) can land on the wrong day. Dates are parsed as local calendar dates, with tests.
 - **Untrusted input is validated.** Backup files are checked record by record with Zod before anything reaches the store.
 - **Self-hosted fonts.** No runtime requests to third-party font servers.
+- **AI keys stay server-side.** The browser calls its own `/api/follow-up` endpoint; only the server holds the Matilda key. The server builds the prompt from three validated fields (company, role, date), so the endpoint can't be used as a free general-purpose chatbot. Requests are incognito, rate-limited and size-capped. The handler is framework-agnostic, so the same code will run in AWS Lambda.
+
+```
+Browser ──POST /api/follow-up {company, title, dateApplied}──▶ API server ──Matilda SDK (API key)──▶ Matilda
+        ◀──────────────── { subject, body } ─────────────────            (key never leaves the server)
+```
 
 ## Project structure
 
@@ -52,6 +60,7 @@ src/
   lib/          Pure logic: dates, insights, backup, sample data (unit tested)
   components/   Board, cards, form, modal, charts
   pages/        Board and Insights screens
+server/         API server: Matilda follow-up drafting (portable to AWS Lambda)
 ```
 
 ## Run it locally
@@ -65,8 +74,17 @@ npm install
 npm run dev        # http://localhost:5173
 ```
 
+### Optional: AI follow-up emails
+
+1. Create a Matilda API key at [matilda.com/settings/api-keys](https://matilda.com/settings/api-keys).
+2. `cp .env.example .env.local` and paste the key into `.env.local` (git-ignored).
+3. In a second terminal, run `npm run dev:api`. Vite forwards `/api` requests to it.
+
+Without a key the app works normally; the draft button just explains that AI drafting isn't set up.
+
 | Command | What it does |
 |---|---|
+| `npm run dev:api` | Start the local API server for AI drafting |
 | `npm test` | Run the test suite once |
 | `npm run test:watch` | Re-run tests on every change |
 | `npm run build` | Type-check and build for production into `dist/` |
