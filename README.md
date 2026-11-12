@@ -11,6 +11,7 @@ I built it for my own graduate job search: my inbox told me *what* happened to e
 ## Features
 
 - **Kanban board.** Drag applications between Saved, Applied, Interview, Offer and Rejected, with a mouse, by touch, or with the keyboard.
+- **Search.** Filter the board by company or role as you type.
 - **Follow-up flags.** Anything still in Applied after 14 days is highlighted, so no application goes quiet unnoticed.
 - **Resume version tracking.** Record which tailored resume you sent to each company.
 - **Insights.** Response rate, interview rate, and interview rate by resume version and role type. Small samples are marked so one lucky application doesn't read as "100% success".
@@ -32,7 +33,7 @@ I built it for my own graduate job search: my inbox told me *what* happened to e
 | Forms | React Hook Form + Zod | One Zod schema is both the TypeScript type and the validation rules |
 | Drag and drop | dnd-kit | Maintained, and supports keyboard and screen readers |
 | Charts | Recharts, lazy-loaded | Only downloaded when Insights is opened |
-| Testing | Vitest + Testing Library | 43 unit and component tests, including full user flows |
+| Testing | Vitest + Testing Library | 44 unit and component tests, including full user flows |
 | AI | Matilda API (`@maincode-ai/matilda-client-sdk`), called server-side | Australian-made model. The API key lives on the server, never in the browser |
 | CI | GitHub Actions | Every push is linted, tested and built on a clean machine |
 

@@ -26,4 +26,19 @@ describe('BoardPage', () => {
     expect(screen.getAllByText('Follow up')).toHaveLength(2)
     expect(screen.getByText('2 need a follow-up')).toBeInTheDocument()
   })
+
+  it('filters cards by company or role as you type', async () => {
+    const user = userEvent.setup()
+    render(<BoardPage onAdd={() => {}} onEdit={() => {}} />)
+    await user.click(screen.getByRole('button', { name: 'Load sample data' }))
+
+    await user.type(screen.getByRole('searchbox', { name: 'Search applications' }), 'canva')
+    expect(screen.getByText('Canva')).toBeInTheDocument()
+    expect(screen.queryByText('Atlassian')).not.toBeInTheDocument()
+    expect(screen.getByText(/Showing 1 of 9/)).toBeInTheDocument()
+
+    await user.clear(screen.getByRole('searchbox', { name: 'Search applications' }))
+    await user.type(screen.getByRole('searchbox', { name: 'Search applications' }), 'zzz')
+    expect(screen.getByText(/No applications match “zzz”/)).toBeInTheDocument()
+  })
 })

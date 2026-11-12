@@ -24,6 +24,7 @@ export function BoardPage({ onAdd, onEdit }: Props) {
   const move = useApplications((s) => s.move)
   const replaceAll = useApplications((s) => s.replaceAll)
   const [activeId, setActiveId] = useState<string | null>(null)
+  const [query, setQuery] = useState('')
 
   const sensors = useSensors(
     useSensor(MouseSensor, { activationConstraint: { distance: 5 } }),
@@ -34,13 +35,23 @@ export function BoardPage({ onAdd, onEdit }: Props) {
     }),
   )
 
+  // Search matches company or role, ignoring case and surrounding spaces.
+  const search = query.trim().toLowerCase()
+  const visible = useMemo(
+    () =>
+      search
+        ? applications.filter((a) => a.company.toLowerCase().includes(search) || a.title.toLowerCase().includes(search))
+        : applications,
+    [applications, search],
+  )
+
   // Group applications by status once per change, newest first within each column.
   const byStatus = useMemo(() => {
     const groups = Object.fromEntries(STATUSES.map((s) => [s, [] as Application[]])) as Record<Status, Application[]>
-    for (const app of applications) groups[app.status].push(app)
+    for (const app of visible) groups[app.status].push(app)
     for (const s of STATUSES) groups[s].sort((a, b) => b.dateApplied.localeCompare(a.dateApplied))
     return groups
-  }, [applications])
+  }, [visible])
 
   const followUpCount = applications.filter((a) => needsFollowUp(a)).length
   const activeApp = applications.find((a) => a.id === activeId)
@@ -82,8 +93,16 @@ export function BoardPage({ onAdd, onEdit }: Props) {
     <>
       <div className="mb-4 flex flex-wrap items-baseline justify-between gap-2">
         <h1 className="font-display text-2xl font-semibold">Board</h1>
+        <input
+          type="search"
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          placeholder="Search company or role"
+          aria-label="Search applications"
+          className="order-last w-full rounded-lg border border-line bg-surface px-3 py-1.5 text-sm placeholder:text-muted focus-visible:border-ink focus-visible:outline-2 focus-visible:outline-applied sm:order-none sm:ml-auto sm:mr-4 sm:w-64"
+        />
         <p className="text-sm text-muted" aria-live="polite">
-          {applications.length} applications
+          {search ? `Showing ${visible.length} of ${applications.length}` : `${applications.length} applications`}
           {followUpCount > 0 && (
             <>
               {', '}
@@ -92,6 +111,10 @@ export function BoardPage({ onAdd, onEdit }: Props) {
           )}
         </p>
       </div>
+
+      {search && visible.length === 0 && (
+        <p className="mb-4 text-sm text-muted">No applications match “{query.trim()}”.</p>
+      )}
 
       <DndContext
         sensors={sensors}
