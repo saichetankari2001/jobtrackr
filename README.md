@@ -33,7 +33,7 @@ I built it for my own graduate job search: my inbox told me *what* happened to e
 | Forms | React Hook Form + Zod | One Zod schema is both the TypeScript type and the validation rules |
 | Drag and drop | dnd-kit | Maintained, and supports keyboard and screen readers |
 | Charts | Recharts, lazy-loaded | Only downloaded when Insights is opened |
-| Testing | Vitest + Testing Library | 44 unit and component tests, including full user flows |
+| Testing | Vitest + Testing Library | 46 unit and component tests, including full user flows |
 | AI | Matilda API (`@maincode-ai/matilda-client-sdk`), called server-side | Australian-made model. The API key lives on the server, never in the browser |
 | CI | GitHub Actions | Every push is linted, tested and built on a clean machine |
 
@@ -44,6 +44,7 @@ I built it for my own graduate job search: my inbox told me *what* happened to e
 - **Code splitting.** Lazy-loading the Insights page cut the initial JavaScript bundle from 804 KB to 436 KB.
 - **Timezone-safe dates.** `new Date('2026-11-06')` is parsed as UTC, which in Melbourne (UTC+11) can land on the wrong day. Dates are parsed as local calendar dates, with tests.
 - **Untrusted input is validated.** Backup files are checked record by record with Zod before anything reaches the store.
+- **Safe links.** The "Open job posting" link only appears for `http`/`https` URLs, so a pasted `javascript:` link can never run, and it opens with `rel="noopener noreferrer"`.
 - **Self-hosted fonts.** No runtime requests to third-party font servers.
 - **AI keys stay server-side.** The browser calls its own `/api/follow-up` endpoint; only the server holds the Matilda key. The server builds the prompt from three validated fields (company, role, date), so the endpoint can't be used as a free general-purpose chatbot. Requests are incognito, rate-limited and size-capped. The handler is framework-agnostic, so the same code will run in AWS Lambda.
 

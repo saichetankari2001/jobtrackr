@@ -1,6 +1,6 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useId, type ReactNode } from 'react'
-import { useForm, type FieldError } from 'react-hook-form'
+import { useForm, useWatch, type FieldError } from 'react-hook-form'
 import { toISODate } from '../lib/dates'
 import {
   ROLE_TYPES,
@@ -41,12 +41,15 @@ export function ApplicationForm({ initial, resumeVersions, onSubmit, onCancel, o
   const {
     register,
     handleSubmit,
+    control,
     formState: { errors },
   } = useForm<ApplicationInput>({
     // The same Zod schema that defines our TypeScript type also validates the form.
     resolver: zodResolver(applicationInputSchema),
     defaultValues: initial ?? emptyInput(),
   })
+
+  const postingUrl = webLink(useWatch({ control, name: 'jobUrl' }))
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} noValidate className="grid gap-4 sm:grid-cols-2">
@@ -63,6 +66,16 @@ export function ApplicationForm({ initial, resumeVersions, onSubmit, onCancel, o
           <input {...a11y} {...register('jobUrl')} type="url" placeholder="https://www.linkedin.com/jobs/…" className={inputClass} />
         )}
       </Field>
+      {postingUrl && (
+        <a
+          href={postingUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="-mt-2 justify-self-start text-sm font-medium text-applied underline underline-offset-2 hover:text-ink focus-visible:outline-2 focus-visible:outline-applied sm:col-span-2"
+        >
+          Open job posting<span className="sr-only"> (opens in a new tab)</span>
+        </a>
+      )}
 
       <Field label="Status" error={errors.status}>
         {(a11y) => (
@@ -169,4 +182,15 @@ function Field({
       )}
     </div>
   )
+}
+
+// Only real web links become clickable. A typed "javascript:" link must never be an href.
+function webLink(value: string | undefined): string | null {
+  if (!value) return null
+  try {
+    const url = new URL(value.trim())
+    return url.protocol === 'https:' || url.protocol === 'http:' ? url.href : null
+  } catch {
+    return null
+  }
 }

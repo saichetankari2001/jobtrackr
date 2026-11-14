@@ -63,4 +63,21 @@ describe('ApplicationForm', () => {
     await user.click(screen.getByRole('button', { name: 'Delete' }))
     expect(onDelete).toHaveBeenCalled()
   })
+
+  it('links to the job posting in a new tab once a web link is entered', async () => {
+    const { user } = setup()
+    expect(screen.queryByRole('link', { name: /Open job posting/ })).not.toBeInTheDocument()
+
+    await user.type(screen.getByLabelText(/Job link/), 'https://www.seek.com.au/job/123')
+    const link = screen.getByRole('link', { name: /Open job posting/ })
+    expect(link).toHaveAttribute('href', 'https://www.seek.com.au/job/123')
+    expect(link).toHaveAttribute('target', '_blank')
+    expect(link).toHaveAttribute('rel', 'noopener noreferrer')
+  })
+
+  it('never turns a non-web link (like javascript:) into a clickable link', async () => {
+    const { user } = setup()
+    await user.type(screen.getByLabelText(/Job link/), 'javascript:alert(1)')
+    expect(screen.queryByRole('link', { name: /Open job posting/ })).not.toBeInTheDocument()
+  })
 })
