@@ -33,7 +33,7 @@ I built it for my own graduate job search: my inbox told me *what* happened to e
 | Forms | React Hook Form + Zod | One Zod schema is both the TypeScript type and the validation rules |
 | Drag and drop | dnd-kit | Maintained, and supports keyboard and screen readers |
 | Charts | Recharts, lazy-loaded | Only downloaded when Insights is opened |
-| Testing | Vitest + Testing Library | 46 unit and component tests, including full user flows |
+| Testing | Vitest + Testing Library | 47 unit and component tests, including full user flows |
 | AI | Matilda API (`@maincode-ai/matilda-client-sdk`), called server-side | Australian-made model. The API key lives on the server, never in the browser |
 | CI | GitHub Actions | Every push is linted, tested and built on a clean machine |
 
@@ -61,7 +61,7 @@ src/
   store/        Zustand store, the only place data is read or written
   lib/          Pure logic: dates, insights, backup, sample data (unit tested)
   components/   Board, cards, form, modal, charts
-  pages/        Board and Insights screens
+  pages/        Board, Insights and Not found screens
 server/         API server: Matilda follow-up drafting (portable to AWS Lambda)
 ```
 

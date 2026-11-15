@@ -47,3 +47,22 @@ describe('App: add, edit and delete an application', () => {
     expect(screen.queryByText('SEEK')).not.toBeInTheDocument()
   })
 })
+
+describe('App: unknown addresses', () => {
+  it('shows a not-found page with a way back to the board', async () => {
+    const user = userEvent.setup()
+    document.title = 'JobTrackr'
+    render(
+      <MemoryRouter initialEntries={['/no-such-page']}>
+        <App />
+      </MemoryRouter>,
+    )
+
+    expect(screen.getByRole('heading', { name: 'Page not found' })).toBeInTheDocument()
+    expect(document.title).toBe('Page not found · JobTrackr')
+
+    await user.click(screen.getByRole('link', { name: 'Go to your board' }))
+    expect(screen.queryByRole('heading', { name: 'Page not found' })).not.toBeInTheDocument()
+    expect(document.title).toBe('JobTrackr')
+  })
+})

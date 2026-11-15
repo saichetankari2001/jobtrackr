@@ -5,6 +5,7 @@ import { DataControls } from './components/DataControls'
 import { FollowUpDraft } from './components/FollowUpDraft'
 import { Modal } from './components/Modal'
 import { BoardPage } from './pages/BoardPage'
+import { NotFoundPage } from './pages/NotFoundPage'
 
 // Code splitting: the charting library is large, so Insights is downloaded only when visited.
 const InsightsPage = lazy(() => import('./pages/InsightsPage').then((m) => ({ default: m.InsightsPage })))
@@ -82,6 +83,7 @@ function App() {
               </Suspense>
             }
           />
+          <Route path="*" element={<NotFoundPage />} />
         </Routes>
       </main>
 
