@@ -46,6 +46,23 @@ describe('BoardPage', () => {
     expect(screen.getByText('Atlassian')).toBeInTheDocument()
   })
 
+  it('focuses search with "/" and clears it with Escape', async () => {
+    const user = userEvent.setup()
+    render(<BoardPage onAdd={() => {}} onEdit={() => {}} />)
+    await user.click(screen.getByRole('button', { name: 'Load sample data' }))
+    const box = screen.getByRole('searchbox', { name: 'Search applications' })
+
+    await user.keyboard('/')
+    expect(box).toHaveFocus()
+    expect(box).toHaveValue('')
+
+    await user.keyboard('canva')
+    expect(screen.queryByText('Atlassian')).not.toBeInTheDocument()
+    await user.keyboard('{Escape}')
+    expect(box).toHaveValue('')
+    expect(screen.getByText('Atlassian')).toBeInTheDocument()
+  })
+
   it('filters cards by company or role as you type', async () => {
     const user = userEvent.setup()
     render(<BoardPage onAdd={() => {}} onEdit={() => {}} />)

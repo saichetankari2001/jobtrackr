@@ -9,7 +9,7 @@ import {
   type DragEndEvent,
   type DragStartEvent,
 } from '@dnd-kit/core'
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { CardBody } from '../components/ApplicationCard'
 import { BoardColumn } from '../components/BoardColumn'
 import { needsFollowUp } from '../lib/dates'
@@ -26,6 +26,20 @@ export function BoardPage({ onAdd, onEdit }: Props) {
   const [activeId, setActiveId] = useState<string | null>(null)
   const [query, setQuery] = useState('')
   const [followUpOnly, setFollowUpOnly] = useState(false)
+  const searchRef = useRef<HTMLInputElement>(null)
+
+  // "/" jumps to search (as on GitHub), unless you are already typing somewhere.
+  useEffect(() => {
+    const onKey = (e: globalThis.KeyboardEvent) => {
+      if (e.key !== '/' || e.ctrlKey || e.metaKey || e.altKey) return
+      const el = e.target as HTMLElement
+      if (el.isContentEditable || ['INPUT', 'TEXTAREA', 'SELECT'].includes(el.tagName)) return
+      e.preventDefault()
+      searchRef.current?.focus()
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [])
 
   const sensors = useSensors(
     useSensor(MouseSensor, { activationConstraint: { distance: 5 } }),
@@ -101,10 +115,13 @@ export function BoardPage({ onAdd, onEdit }: Props) {
       <div className="mb-4 flex flex-wrap items-baseline justify-between gap-2">
         <h1 className="font-display text-2xl font-semibold">Board</h1>
         <input
+          ref={searchRef}
           type="search"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          placeholder="Search company or role"
+          onKeyDown={(e) => e.key === 'Escape' && setQuery('')}
+          placeholder="Search company or role (press /)"
+          aria-keyshortcuts="/"
           aria-label="Search applications"
           className="order-last w-full rounded-lg border border-line bg-surface px-3 py-1.5 text-sm placeholder:text-muted focus-visible:border-ink focus-visible:outline-2 focus-visible:outline-applied sm:order-none sm:ml-auto sm:mr-4 sm:w-64"
         />
