@@ -25,6 +25,7 @@ export function BoardPage({ onAdd, onEdit }: Props) {
   const replaceAll = useApplications((s) => s.replaceAll)
   const [activeId, setActiveId] = useState<string | null>(null)
   const [query, setQuery] = useState('')
+  const [followUpOnly, setFollowUpOnly] = useState(false)
 
   const sensors = useSensors(
     useSensor(MouseSensor, { activationConstraint: { distance: 5 } }),
@@ -35,14 +36,21 @@ export function BoardPage({ onAdd, onEdit }: Props) {
     }),
   )
 
+  const followUpCount = applications.filter((a) => needsFollowUp(a)).length
+  // If the last flagged card is moved away, the filter switches itself off instead of showing an empty board.
+  const showFollowUpsOnly = followUpOnly && followUpCount > 0
+
   // Search matches company or role, ignoring case and surrounding spaces.
   const search = query.trim().toLowerCase()
+  const filtering = Boolean(search) || showFollowUpsOnly
   const visible = useMemo(
     () =>
-      search
-        ? applications.filter((a) => a.company.toLowerCase().includes(search) || a.title.toLowerCase().includes(search))
-        : applications,
-    [applications, search],
+      applications.filter(
+        (a) =>
+          (!showFollowUpsOnly || needsFollowUp(a)) &&
+          (!search || a.company.toLowerCase().includes(search) || a.title.toLowerCase().includes(search)),
+      ),
+    [applications, search, showFollowUpsOnly],
   )
 
   // Group applications by status once per change, newest first within each column.
@@ -53,7 +61,6 @@ export function BoardPage({ onAdd, onEdit }: Props) {
     return groups
   }, [visible])
 
-  const followUpCount = applications.filter((a) => needsFollowUp(a)).length
   const activeApp = applications.find((a) => a.id === activeId)
 
   const onDragStart = ({ active }: DragStartEvent) => setActiveId(String(active.id))
@@ -101,18 +108,29 @@ export function BoardPage({ onAdd, onEdit }: Props) {
           aria-label="Search applications"
           className="order-last w-full rounded-lg border border-line bg-surface px-3 py-1.5 text-sm placeholder:text-muted focus-visible:border-ink focus-visible:outline-2 focus-visible:outline-applied sm:order-none sm:ml-auto sm:mr-4 sm:w-64"
         />
-        <p className="text-sm text-muted" aria-live="polite">
-          {search ? `Showing ${visible.length} of ${applications.length}` : `${applications.length} applications`}
+        <div className="flex items-baseline gap-1 text-sm text-muted">
+          <p aria-live="polite">
+            {filtering ? `Showing ${visible.length} of ${applications.length}` : `${applications.length} applications`}
+            {followUpCount > 0 && ','}
+          </p>
           {followUpCount > 0 && (
-            <>
-              {', '}
-              <span className="font-semibold text-followup">{followUpCount} need a follow-up</span>
-            </>
+            // A toggle button: aria-pressed tells screen readers whether the filter is on.
+            <button
+              type="button"
+              aria-pressed={showFollowUpsOnly}
+              onClick={() => setFollowUpOnly(!showFollowUpsOnly)}
+              title={showFollowUpsOnly ? 'Show all applications' : 'Show only these'}
+              className={`rounded-full px-2 py-0.5 font-semibold focus-visible:outline-2 focus-visible:outline-applied ${
+                showFollowUpsOnly ? 'bg-followup text-white' : 'text-followup underline decoration-dotted underline-offset-2 hover:bg-followup/10'
+              }`}
+            >
+              {followUpCount} need a follow-up
+            </button>
           )}
-        </p>
+        </div>
       </div>
 
-      {search && visible.length === 0 && (
+      {filtering && visible.length === 0 && (
         <p className="mb-4 text-sm text-muted">No applications match “{query.trim()}”.</p>
       )}
 

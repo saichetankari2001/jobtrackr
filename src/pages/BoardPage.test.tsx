@@ -27,6 +27,25 @@ describe('BoardPage', () => {
     expect(screen.getByText('2 need a follow-up')).toBeInTheDocument()
   })
 
+  it('shows only applications that need a follow-up when the flag is clicked', async () => {
+    const user = userEvent.setup()
+    render(<BoardPage onAdd={() => {}} onEdit={() => {}} />)
+    await user.click(screen.getByRole('button', { name: 'Load sample data' }))
+
+    const toggle = screen.getByRole('button', { name: '2 need a follow-up' })
+    expect(toggle).toHaveAttribute('aria-pressed', 'false')
+    await user.click(toggle)
+
+    expect(toggle).toHaveAttribute('aria-pressed', 'true')
+    expect(screen.getByText('Canva')).toBeInTheDocument()
+    expect(screen.getByText('REA Group')).toBeInTheDocument()
+    expect(screen.queryByText('Atlassian')).not.toBeInTheDocument()
+    expect(screen.getByText(/Showing 2 of 9/)).toBeInTheDocument()
+
+    await user.click(toggle)
+    expect(screen.getByText('Atlassian')).toBeInTheDocument()
+  })
+
   it('filters cards by company or role as you type', async () => {
     const user = userEvent.setup()
     render(<BoardPage onAdd={() => {}} onEdit={() => {}} />)
