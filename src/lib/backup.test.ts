@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { createApplication } from '../store/applications'
 import type { ApplicationInput } from '../types/application'
-import { mergeApplications, parseBackup, serializeBackup } from './backup'
+import { backupFileName, mergeApplications, parseBackup, serializeBackup } from './backup'
 
 const input: ApplicationInput = {
   company: 'Canva', title: 'Frontend Engineer', jobUrl: '', location: 'Sydney', roleType: 'Frontend',
@@ -42,5 +42,10 @@ describe('backup', () => {
     expect(applications.map((a) => a.company).sort()).toEqual(['Canva', 'SEEK', 'Xero'])
     expect(applications.find((a) => a.id === existing.id)?.status).toBe('interview')
     expect({ addedCount, updatedCount }).toEqual({ addedCount: 1, updatedCount: 1 })
+  })
+
+  it('names the backup file with the local date, not the UTC date', () => {
+    // 8am in Melbourne is still the previous day in UTC, so a UTC-based name would be off by one.
+    expect(backupFileName(new Date(2026, 10, 19, 8, 0))).toBe('jobtrackr-backup-2026-11-19.json')
   })
 })

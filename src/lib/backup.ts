@@ -1,3 +1,4 @@
+import { toISODate } from './dates'
 import { z } from 'zod'
 import { applicationInputSchema, type Application } from '../types/application'
 
@@ -59,4 +60,5 @@ export const mergeApplications = (existing: Application[], incoming: Application
   return { applications: [...byId.values()], added, updated }
 }
 
-export const backupFileName = (date = new Date()) => `jobtrackr-backup-${date.toISOString().slice(0, 10)}.json`
+// Local date: toISOString() is UTC, which names a morning backup in Melbourne after the previous day.
+export const backupFileName = (date = new Date()) => `jobtrackr-backup-${toISODate(date)}.json`

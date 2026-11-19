@@ -1,5 +1,6 @@
 import { useRef, useState, type ChangeEvent } from 'react'
 import { backupFileName, mergeApplications, parseBackup, serializeBackup } from '../lib/backup'
+import { csvFileName, toCSV } from '../lib/csv'
 import { useApplications } from '../store/applications'
 
 type Message = { tone: 'ok' | 'error'; text: string } | null
@@ -13,13 +14,13 @@ export function DataControls() {
   const [message, setMessage] = useState<Message>(null)
 
   const handleExport = () => {
-    // Build the file in memory and trigger a download; nothing leaves the browser.
-    const blob = new Blob([serializeBackup(applications)], { type: 'application/json' })
-    const url = URL.createObjectURL(blob)
-    const link = Object.assign(document.createElement('a'), { href: url, download: backupFileName() })
-    link.click()
-    URL.revokeObjectURL(url)
+    download(serializeBackup(applications), 'application/json', backupFileName())
     setMessage({ tone: 'ok', text: `Exported ${applications.length} applications.` })
+  }
+
+  const handleExportCSV = () => {
+    download(toCSV(applications), 'text/csv;charset=utf-8', csvFileName())
+    setMessage({ tone: 'ok', text: `Exported ${applications.length} applications as CSV.` })
   }
 
   const handleImport = async (e: ChangeEvent<HTMLInputElement>) => {
@@ -44,6 +45,9 @@ export function DataControls() {
         <button type="button" onClick={handleExport} disabled={applications.length === 0} className={buttonClass}>
           Export backup
         </button>
+        <button type="button" onClick={handleExportCSV} disabled={applications.length === 0} className={buttonClass}>
+          Export CSV
+        </button>
         <button type="button" onClick={() => fileInput.current?.click()} className={buttonClass}>
           Import backup
         </button>
@@ -54,4 +58,12 @@ export function DataControls() {
       </p>
     </footer>
   )
+}
+
+// Build the file in memory and trigger a download; nothing leaves the browser.
+function download(contents: string, type: string, fileName: string) {
+  const url = URL.createObjectURL(new Blob([contents], { type }))
+  const link = Object.assign(document.createElement('a'), { href: url, download: fileName })
+  link.click()
+  URL.revokeObjectURL(url)
 }
