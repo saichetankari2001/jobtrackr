@@ -45,4 +45,12 @@ describe('applications store', () => {
     useApplications.getState().remove(app.id)
     expect(useApplications.getState().applications).toHaveLength(0)
   })
+
+  it('restores a removed application exactly as it was, without duplicating it', () => {
+    const app = useApplications.getState().add(input)
+    useApplications.getState().remove(app.id)
+    useApplications.getState().restore(app)
+    useApplications.getState().restore(app)
+    expect(useApplications.getState().applications).toEqual([app])
+  })
 })

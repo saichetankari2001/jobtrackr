@@ -17,6 +17,7 @@ I built it for my own graduate job search: my inbox told me *what* happened to e
 - **Insights.** Response rate, interview rate, and interview rate by resume version and role type. Small samples are marked so one lucky application doesn't read as "100% success".
 - **AI follow-up emails, powered by [Matilda](https://maincode.com/matilda/api).** For an application with no reply, Matilda drafts a short follow-up email you can review and copy. Only the company, role and date are sent; your notes never leave the browser.
 - **Backup.** Export and import your data as JSON. Imports are validated and merged, never overwritten blindly.
+- **Undo delete.** Deleting is instant, with an Undo button for 8 seconds instead of an "Are you sure?" popup.
 - **Spreadsheet export.** Download every application as a CSV that opens cleanly in Excel or Google Sheets.
 - **Sample data.** One click loads a realistic board, so you can try it without typing anything.
 
@@ -34,7 +35,7 @@ I built it for my own graduate job search: my inbox told me *what* happened to e
 | Forms | React Hook Form + Zod | One Zod schema is both the TypeScript type and the validation rules |
 | Drag and drop | dnd-kit | Maintained, and supports keyboard and screen readers |
 | Charts | Recharts, lazy-loaded | Only downloaded when Insights is opened |
-| Testing | Vitest + Testing Library | 57 unit and component tests, including full user flows |
+| Testing | Vitest + Testing Library | 60 unit and component tests, including full user flows |
 | AI | Matilda API (`@maincode-ai/matilda-client-sdk`), called server-side | Australian-made model. The API key lives on the server, never in the browser |
 | CI | GitHub Actions | Every push is linted, tested and built on a clean machine |
 

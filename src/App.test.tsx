@@ -1,4 +1,4 @@
-import { render, screen, within } from '@testing-library/react'
+import { act, render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter } from 'react-router-dom'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
@@ -41,10 +41,38 @@ describe('App: add, edit and delete an application', () => {
     await user.click(within(dialog).getByRole('button', { name: 'Save changes' }))
     expect(within(screen.getByRole('region', { name: 'Offer' })).getByText('SEEK')).toBeInTheDocument()
 
-    vi.spyOn(window, 'confirm').mockReturnValue(true)
+    const confirm = vi.spyOn(window, 'confirm')
     await user.click(screen.getByText('SEEK'))
     await user.click(screen.getByRole('button', { name: 'Delete' }))
     expect(screen.queryByText('SEEK')).not.toBeInTheDocument()
+    expect(confirm).not.toHaveBeenCalled()
+    expect(screen.getByRole('status', { name: 'Deleted' })).toHaveTextContent('Deleted SEEK')
+  })
+
+  it('brings a deleted application back with Undo', async () => {
+    const user = userEvent.setup()
+    renderApp()
+    await user.click(screen.getByRole('button', { name: 'Load sample data' }))
+
+    await user.click(screen.getByText('SEEK'))
+    await user.click(screen.getByRole('button', { name: 'Delete' }))
+    await user.click(screen.getByRole('button', { name: 'Undo' }))
+
+    expect(screen.getByText('SEEK')).toBeInTheDocument()
+    expect(screen.queryByRole('status', { name: 'Deleted' })).not.toBeInTheDocument()
+  })
+
+  it('hides the Undo notice after 8 seconds', async () => {
+    vi.useFakeTimers({ shouldAdvanceTime: true })
+    const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime })
+    renderApp()
+    await user.click(screen.getByRole('button', { name: 'Load sample data' }))
+    await user.click(screen.getByText('SEEK'))
+    await user.click(screen.getByRole('button', { name: 'Delete' }))
+
+    act(() => vi.advanceTimersByTime(8000))
+    expect(screen.queryByRole('button', { name: 'Undo' })).not.toBeInTheDocument()
+    vi.useRealTimers()
   })
 })
 

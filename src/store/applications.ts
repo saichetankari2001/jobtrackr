@@ -8,6 +8,7 @@ type ApplicationsState = {
   update: (id: string, input: ApplicationInput) => void
   move: (id: string, status: Status) => void
   remove: (id: string) => void
+  restore: (app: Application) => void
   replaceAll: (applications: Application[]) => void
 }
 
@@ -55,6 +56,10 @@ export const useApplications = create<ApplicationsState>()(
         })),
 
       remove: (id) => set((s) => ({ applications: s.applications.filter((a) => a.id !== id) })),
+
+      // Puts a deleted application back unchanged (same id and dates). Ignored if it is already there.
+      restore: (app) =>
+        set((s) => (s.applications.some((a) => a.id === app.id) ? s : { applications: [app, ...s.applications] })),
 
       replaceAll: (applications) => set({ applications }),
     }),

@@ -1,9 +1,10 @@
-import { lazy, Suspense, useMemo, useState } from 'react'
+import { lazy, Suspense, useCallback, useMemo, useState } from 'react'
 import { NavLink, Route, Routes } from 'react-router-dom'
 import { ApplicationForm } from './components/ApplicationForm'
 import { DataControls } from './components/DataControls'
 import { FollowUpDraft } from './components/FollowUpDraft'
 import { Modal } from './components/Modal'
+import { UndoToast } from './components/UndoToast'
 import { BoardPage } from './pages/BoardPage'
 import { NotFoundPage } from './pages/NotFoundPage'
 
@@ -22,7 +23,8 @@ const navClass = ({ isActive }: { isActive: boolean }) =>
 
 function App() {
   const [editing, setEditing] = useState<Editing>(null)
-  const { applications, add, update, remove } = useApplications()
+  const [deleted, setDeleted] = useState<Application | null>(null)
+  const { applications, add, update, remove, restore } = useApplications()
 
   // Previously used resume versions, offered as suggestions so names stay consistent.
   const resumeVersions = useMemo(
@@ -42,11 +44,18 @@ function App() {
 
   const handleDelete = () => {
     if (editing?.mode !== 'edit') return
-    if (window.confirm(`Delete ${editing.app.company}? This cannot be undone.`)) {
-      remove(editing.app.id)
-      close()
-    }
+    remove(editing.app.id)
+    setDeleted(editing.app)
+    close()
   }
+
+  const handleUndo = () => {
+    if (deleted) restore(deleted)
+    setDeleted(null)
+  }
+
+  // Stable identity, so the toast's 8-second timer isn't restarted on every render.
+  const dismissUndo = useCallback(() => setDeleted(null), [])
 
   return (
     <div className="min-h-screen">
@@ -103,6 +112,11 @@ function App() {
           />
         )}
       </Modal>
+
+      {deleted && (
+        // Keyed by id: deleting a second card restarts the timer for the new one.
+        <UndoToast key={deleted.id} message={`Deleted ${deleted.company}`} onUndo={handleUndo} onDismiss={dismissUndo} />
+      )}
     </div>
   )
 }
