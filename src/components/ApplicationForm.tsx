@@ -1,7 +1,8 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useId, type ReactNode } from 'react'
 import { useForm, useWatch, type FieldError } from 'react-hook-form'
-import { toISODate } from '../lib/dates'
+import { formatDate, toISODate } from '../lib/dates'
+import { findDuplicate } from '../lib/duplicates'
 import {
   ROLE_TYPES,
   STATUSES,
@@ -13,6 +14,8 @@ import {
 
 type Props = {
   initial?: Application
+  /** Everything already tracked, used to warn about adding the same job twice. */
+  existing?: Application[]
   resumeVersions: string[]
   onSubmit: (input: ApplicationInput) => void
   onCancel: () => void
@@ -34,7 +37,7 @@ const emptyInput = (): ApplicationInput => ({
 const inputClass =
   'mt-1 block w-full rounded-lg border border-line bg-surface px-3 py-2 text-sm placeholder:text-muted/70 focus:border-applied focus:outline-2 focus:outline-applied/30 aria-invalid:border-danger'
 
-export function ApplicationForm({ initial, resumeVersions, onSubmit, onCancel, onDelete }: Props) {
+export function ApplicationForm({ initial, existing = [], resumeVersions, onSubmit, onCancel, onDelete }: Props) {
   const isEdit = Boolean(initial)
   const datalistId = useId()
 
@@ -49,7 +52,13 @@ export function ApplicationForm({ initial, resumeVersions, onSubmit, onCancel, o
     defaultValues: initial ?? emptyInput(),
   })
 
-  const postingUrl = webLink(useWatch({ control, name: 'jobUrl' }))
+  const [company, title, jobUrl] = useWatch({ control, name: ['company', 'title', 'jobUrl'] })
+  const postingUrl = webLink(jobUrl)
+  // A warning, not an error: re-applying to the same job months later can be deliberate.
+  const duplicate = findDuplicate(existing, { company, title, jobUrl }, initial?.id)
+  const duplicateMessage = duplicate
+    ? `You already track ${duplicate.company}, ${duplicate.title} (${STATUS_LABELS[duplicate.status]}, ${formatDate(duplicate.dateApplied)}).`
+    : ''
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} noValidate className="grid gap-4 sm:grid-cols-2">
@@ -60,6 +69,17 @@ export function ApplicationForm({ initial, resumeVersions, onSubmit, onCancel, o
       <Field label="Job title" error={errors.title}>
         {(a11y) => <input {...a11y} {...register('title')} className={inputClass} />}
       </Field>
+
+      {/* Always in the page so screen readers announce changes; sr-only is absolutely positioned,
+          so it takes no row in the grid. The visible copy below appears only when there is a match. */}
+      <p role="status" className="sr-only">
+        {duplicateMessage}
+      </p>
+      {duplicateMessage && (
+        <p aria-hidden className="-mt-2 text-sm font-medium text-followup sm:col-span-2">
+          {duplicateMessage}
+        </p>
+      )}
 
       <Field label="Job link (optional)" error={errors.jobUrl} wide>
         {(a11y) => (

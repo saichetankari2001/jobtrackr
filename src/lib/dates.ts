@@ -22,3 +22,10 @@ export const toISODate = (date: Date) =>
   `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`
 
 export const formatAge = (days: number) => (days === 0 ? 'today' : days === 1 ? '1 day ago' : `${days} days ago`)
+
+// '2026-11-03' → '3 Nov 2026'. Fixed to Australian order so it reads the same on every machine.
+const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+export const formatDate = (isoDate: string) => {
+  const date = parseLocalDate(isoDate)
+  return `${date.getDate()} ${MONTHS[date.getMonth()]} ${date.getFullYear()}`
+}

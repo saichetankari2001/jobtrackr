@@ -75,6 +75,21 @@ describe('ApplicationForm', () => {
     expect(link).toHaveAttribute('rel', 'noopener noreferrer')
   })
 
+  it('warns, without blocking, when the job is already being tracked', async () => {
+    const existing = createApplication({
+      company: 'Canva', title: 'Frontend Engineer', jobUrl: '', location: '', roleType: 'Frontend',
+      resumeVersion: '', status: 'interview', dateApplied: '2026-11-03', notes: '',
+    })
+    const { onSubmit, user } = setup({ existing: [existing] })
+
+    await user.type(screen.getByLabelText('Company'), 'canva')
+    await user.type(screen.getByLabelText('Job title'), 'Frontend engineer')
+    expect(screen.getByRole('status')).toHaveTextContent('You already track Canva, Frontend Engineer (Interview, 3 Nov 2026).')
+
+    await user.click(screen.getByRole('button', { name: 'Add application' }))
+    expect(onSubmit).toHaveBeenCalledTimes(1)
+  })
+
   it('never turns a non-web link (like javascript:) into a clickable link', async () => {
     const { user } = setup()
     await user.type(screen.getByLabelText(/Job link/), 'javascript:alert(1)')

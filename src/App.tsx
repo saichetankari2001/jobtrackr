@@ -105,6 +105,7 @@ function App() {
             // A new key resets the form when switching between different applications.
             key={editing.mode === 'edit' ? editing.app.id : 'new'}
             initial={editing.mode === 'edit' ? editing.app : undefined}
+            existing={applications}
             resumeVersions={resumeVersions}
             onSubmit={handleSubmit}
             onCancel={close}
