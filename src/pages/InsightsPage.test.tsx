@@ -30,6 +30,8 @@ describe('InsightsPage', () => {
     expect(screen.getByText('Response rate', { selector: 'dt' }).nextElementSibling).toHaveTextContent('63%')
     expect(screen.getByText('Interview rate', { selector: 'dt' }).nextElementSibling).toHaveTextContent('38%')
     expect(screen.getByText('Follow-ups due', { selector: 'dt' }).nextElementSibling).toHaveTextContent('2')
+    // Sample replies came 2, 4, 5, 6 and 9 days after applying: the median is 5.
+    expect(screen.getByText('Median reply time', { selector: 'dt' }).nextElementSibling).toHaveTextContent('5 days')
 
     expect(screen.getByRole('heading', { name: 'Which resume gets interviews' })).toBeInTheDocument()
     expect(screen.getAllByRole('table')).toHaveLength(3)

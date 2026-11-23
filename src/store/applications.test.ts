@@ -53,4 +53,27 @@ describe('applications store', () => {
     useApplications.getState().restore(app)
     expect(useApplications.getState().applications).toEqual([app])
   })
+
+  it('records the first reply once: kept from Interview to Offer, cleared if moved back to Applied', () => {
+    const { add, move } = useApplications.getState()
+    const app = add(input)
+    expect(app.repliedAt).toBeUndefined()
+
+    move(app.id, 'interview')
+    const firstReply = useApplications.getState().applications[0].repliedAt
+    expect(firstReply).toBeTruthy()
+
+    move(app.id, 'offer')
+    expect(useApplications.getState().applications[0].repliedAt).toBe(firstReply)
+
+    move(app.id, 'applied')
+    expect(useApplications.getState().applications[0].repliedAt).toBeUndefined()
+  })
+
+  it('records the first reply when the status is changed through the edit form too', () => {
+    const app = useApplications.getState().add(input)
+    useApplications.getState().update(app.id, { ...input, status: 'rejected' })
+    expect(useApplications.getState().applications[0].repliedAt).toBeTruthy()
+  })
 })
+

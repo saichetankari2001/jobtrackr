@@ -1,5 +1,5 @@
 import { STATUSES, STATUS_LABELS, type Application, type Status } from '../types/application'
-import { needsFollowUp } from './dates'
+import { daysSince, needsFollowUp } from './dates'
 
 // Below this many applications, a percentage is too noisy to trust, so the UI labels it.
 export const SMALL_SAMPLE = 3
@@ -51,5 +51,21 @@ export type StatusCount = { status: Status; label: string; count: number }
 
 export const statusCounts = (apps: Application[]): StatusCount[] =>
   STATUSES.map((status) => ({ status, label: STATUS_LABELS[status], count: apps.filter((a) => a.status === status).length }))
+
+export type ReplyTime = { medianDays: number | null; replies: number }
+
+// Median days from applying to the first reply. The median, not the average, so one company that
+// took three months doesn't make every company look slow.
+export const replyTime = (apps: Application[]): ReplyTime => {
+  const days = apps
+    .filter((a) => a.repliedAt)
+    // daysSince counts whole local calendar days, so the reply's time of day doesn't matter.
+    .map((a) => daysSince(a.dateApplied, new Date(a.repliedAt!)))
+    .sort((a, b) => a - b)
+  if (days.length === 0) return { medianDays: null, replies: 0 }
+  const mid = Math.floor(days.length / 2)
+  const median = days.length % 2 ? days[mid] : (days[mid - 1] + days[mid]) / 2
+  return { medianDays: Math.round(median), replies: days.length }
+}
 
 export const formatPercent = (value: number) => `${Math.round(value * 100)}%`

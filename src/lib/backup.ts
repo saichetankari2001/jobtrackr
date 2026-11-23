@@ -10,6 +10,7 @@ const applicationSchema = applicationInputSchema.extend({
   createdAt: z.iso.datetime(),
   updatedAt: z.iso.datetime(),
   statusChangedAt: z.iso.datetime(),
+  repliedAt: z.iso.datetime().optional(),
 })
 
 const backupSchema = z.object({

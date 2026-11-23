@@ -2,7 +2,7 @@ import { useMemo } from 'react'
 import { Link } from 'react-router-dom'
 import { RateChart } from '../components/charts/RateChart'
 import { StatusChart } from '../components/charts/StatusChart'
-import { formatPercent, rateBy, statusCounts, summarize } from '../lib/insights'
+import { formatPercent, rateBy, replyTime, statusCounts, summarize } from '../lib/insights'
 import { useApplications } from '../store/applications'
 
 export function InsightsPage() {
@@ -12,13 +12,14 @@ export function InsightsPage() {
   const insights = useMemo(
     () => ({
       summary: summarize(applications),
+      replies: replyTime(applications),
       byResume: rateBy(applications, (a) => a.resumeVersion),
       byRole: rateBy(applications, (a) => a.roleType),
       byStatus: statusCounts(applications),
     }),
     [applications],
   )
-  const { summary } = insights
+  const { summary, replies } = insights
 
   if (summary.applied === 0) {
     return (
@@ -42,7 +43,7 @@ export function InsightsPage() {
       <h1 className="font-display text-2xl font-semibold">Insights</h1>
       <p className="mt-1 text-sm text-muted">Based on {summary.applied} applications you have sent. Saved jobs are not counted.</p>
 
-      <dl className="mt-5 grid grid-cols-2 gap-3 lg:grid-cols-4">
+      <dl className="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
         <Stat label="Applications sent" value={String(summary.applied)} />
         <Stat label="Response rate" value={formatPercent(summary.responseRate)} hint="Got any reply: interview, offer or rejection" />
         <Stat label="Interview rate" value={formatPercent(summary.interviewRate)} hint="Now at Interview or Offer" />
@@ -51,6 +52,15 @@ export function InsightsPage() {
           value={String(summary.followUps)}
           hint="Still in Applied after 14 days"
           highlight={summary.followUps > 0}
+        />
+        <Stat
+          label="Median reply time"
+          value={replies.medianDays === null ? '–' : `${replies.medianDays} ${replies.medianDays === 1 ? 'day' : 'days'}`}
+          hint={
+            replies.replies === 0
+              ? 'Shows once a company replies'
+              : `From applying to first reply, across ${replies.replies} ${replies.replies === 1 ? 'reply' : 'replies'}`
+          }
         />
       </dl>
 

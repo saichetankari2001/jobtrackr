@@ -1,6 +1,6 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
-import type { Application, ApplicationInput, Status } from '../types/application'
+import { isReply, type Application, type ApplicationInput, type Status } from '../types/application'
 
 type ApplicationsState = {
   applications: Application[]
@@ -21,6 +21,16 @@ export const createApplication = (input: ApplicationInput, now = new Date().toIS
   statusChangedAt: now,
 })
 
+// The fields that change with the status. The first reply is recorded once and kept from Interview to Offer;
+// moving a card back to Saved or Applied means it was a mistake, so the reply date is cleared.
+const statusChange = (app: Application, status: Status, now: string): Partial<Application> => {
+  if (app.status === status) return {}
+  return {
+    statusChangedAt: now,
+    repliedAt: isReply(status) ? (app.repliedAt ?? now) : undefined,
+  }
+}
+
 export const useApplications = create<ApplicationsState>()(
   persist(
     (set) => ({
@@ -37,12 +47,7 @@ export const useApplications = create<ApplicationsState>()(
           applications: s.applications.map((a) => {
             if (a.id !== id) return a
             const now = new Date().toISOString()
-            return {
-              ...a,
-              ...input,
-              updatedAt: now,
-              statusChangedAt: a.status === input.status ? a.statusChangedAt : now,
-            }
+            return { ...a, ...input, updatedAt: now, ...statusChange(a, input.status, now) }
           }),
         })),
 
@@ -51,7 +56,7 @@ export const useApplications = create<ApplicationsState>()(
           applications: s.applications.map((a) => {
             if (a.id !== id || a.status === status) return a
             const now = new Date().toISOString()
-            return { ...a, status, updatedAt: now, statusChangedAt: now }
+            return { ...a, status, updatedAt: now, ...statusChange(a, status, now) }
           }),
         })),
 

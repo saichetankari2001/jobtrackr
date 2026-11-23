@@ -48,4 +48,14 @@ describe('backup', () => {
     // 8am in Melbourne is still the previous day in UTC, so a UTC-based name would be off by one.
     expect(backupFileName(new Date(2026, 10, 19, 8, 0))).toBe('jobtrackr-backup-2026-11-19.json')
   })
+
+  it('keeps the reply date through export and import, and still accepts older backups without it', () => {
+    const withReply = { ...createApplication({ ...input, status: 'interview' }), repliedAt: '2026-11-04T05:00:00.000Z' }
+    const withoutReply = createApplication(input)
+    const result = parseBackup(serializeBackup([withReply, withoutReply]))
+
+    expect(result.ok && result.applications[0].repliedAt).toBe('2026-11-04T05:00:00.000Z')
+    expect(result.ok && result.applications[1].repliedAt).toBeUndefined()
+  })
 })
+

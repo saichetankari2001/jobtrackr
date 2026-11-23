@@ -14,7 +14,7 @@ I built it for my own graduate job search: my inbox told me *what* happened to e
 - **Search.** Filter the board by company or role as you type. Press `/` to jump to search and `Esc` to clear it.
 - **Follow-up flags.** Anything still in Applied after 14 days is highlighted, so no application goes quiet unnoticed. One click on the follow-up count shows only those cards.
 - **Resume version tracking.** Record which tailored resume you sent to each company.
-- **Insights.** Response rate, interview rate, and interview rate by resume version and role type. Small samples are marked so one lucky application doesn't read as "100% success".
+- **Insights.** Median reply time, response rate, interview rate, and interview rate by resume version and role type. Small samples are marked so one lucky application doesn't read as "100% success".
 - **AI follow-up emails, powered by [Matilda](https://maincode.com/matilda/api).** For an application with no reply, Matilda drafts a short follow-up email you can review and copy. Only the company, role and date are sent; your notes never leave the browser.
 - **Backup.** Export and import your data as JSON. Imports are validated and merged, never overwritten blindly.
 - **Duplicate warning.** Adding a job you already track (same company and role, or same job link) shows a warning, so you don't apply twice by accident.
@@ -36,7 +36,7 @@ I built it for my own graduate job search: my inbox told me *what* happened to e
 | Forms | React Hook Form + Zod | One Zod schema is both the TypeScript type and the validation rules |
 | Drag and drop | dnd-kit | Maintained, and supports keyboard and screen readers |
 | Charts | Recharts, lazy-loaded | Only downloaded when Insights is opened |
-| Testing | Vitest + Testing Library | 65 unit and component tests, including full user flows |
+| Testing | Vitest + Testing Library | 70 unit and component tests, including full user flows |
 | AI | Matilda API (`@maincode-ai/matilda-client-sdk`), called server-side | Australian-made model. The API key lives on the server, never in the browser |
 | CI | GitHub Actions | Every push is linted, tested and built on a clean machine |
 
@@ -45,6 +45,7 @@ I built it for my own graduate job search: my inbox told me *what* happened to e
 - **Accessibility first.** Keyboard drag and drop with screen-reader announcements, a native `<dialog>` for focus trapping, form errors linked to their inputs, and a table view behind every chart. A component test caught a header button that screen readers would have read as "Addapplication".
 - **Colour-blind-safe status palette.** A palette validator showed the original Offer (green) and Rejected (red) colours were indistinguishable with red-green colour blindness (ΔE 1.2). The colours were re-picked to ΔE 7.9, and every status is also labelled in text.
 - **Code splitting.** Lazy-loading the Insights page cut the initial JavaScript bundle from 804 KB to 436 KB.
+- **Honest reply-time stats.** The app records when an application *first* got a reply (kept from Interview to Offer, cleared if a card is moved back by mistake) and reports the median, so one slow company can't skew it. The new field is optional, so older saved data and backups still load. Tested in Melbourne, UTC and Los Angeles timezones.
 - **Timezone-safe dates.** `new Date('2026-11-06')` is parsed as UTC, which in Melbourne (UTC+11) can land on the wrong day. Dates are parsed as local calendar dates, with tests.
 - **Untrusted input is validated.** Backup files are checked record by record with Zod before anything reaches the store.
 - **CSV injection protection.** Exported cells that start with `=`, `+`, `-` or `@` are prefixed so Excel shows them as text instead of running them as formulas. A note like `=HYPERLINK(...)` can't turn into a live link.

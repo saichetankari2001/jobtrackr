@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { createApplication } from '../store/applications'
 import type { ApplicationInput, Status } from '../types/application'
-import { rateBy, statusCounts, summarize } from './insights'
+import { rateBy, replyTime, statusCounts, summarize } from './insights'
 
 const now = new Date(2026, 10, 20)
 
@@ -66,3 +66,21 @@ describe('statusCounts', () => {
     ])
   })
 })
+
+describe('replyTime', () => {
+  // Applied on the 1st, replied the given number of days later (local time).
+  const replied = (days: number) => ({
+    ...make('interview', { dateApplied: '2026-11-01' }),
+    repliedAt: new Date(2026, 10, 1 + days, 15, 30).toISOString(),
+  })
+
+  it('gives the median days from applying to the first reply, so one slow company cannot skew it', () => {
+    expect(replyTime([replied(2), replied(4), replied(90)])).toEqual({ medianDays: 4, replies: 3 })
+    expect(replyTime([replied(3), replied(6)])).toEqual({ medianDays: 5, replies: 2 })
+  })
+
+  it('ignores applications with no recorded reply, and returns null when there are none', () => {
+    expect(replyTime([make('applied'), make('offer')])).toEqual({ medianDays: null, replies: 0 })
+  })
+})
+

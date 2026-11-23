@@ -35,6 +35,12 @@ export type Application = ApplicationInput & {
   id: string
   createdAt: string
   updatedAt: string
-  // When the status last changed: used for "no reply after 14 days" and response-time stats.
+  // When the status last changed.
   statusChangedAt: string
+  // When the application first moved to Interview, Offer or Rejected: the company's first reply.
+  // Optional, so data saved before this field existed still loads.
+  repliedAt?: string
 }
+
+// Statuses that mean the company has answered.
+export const isReply = (status: Status) => status === 'interview' || status === 'offer' || status === 'rejected'
