@@ -1,10 +1,11 @@
-import { lazy, Suspense, useCallback, useMemo, useState } from 'react'
+import { lazy, Suspense, useCallback, useEffect, useMemo, useState } from 'react'
 import { NavLink, Route, Routes } from 'react-router-dom'
 import { ApplicationForm } from './components/ApplicationForm'
 import { DataControls } from './components/DataControls'
 import { FollowUpDraft } from './components/FollowUpDraft'
 import { Modal } from './components/Modal'
 import { UndoToast } from './components/UndoToast'
+import { isShortcut } from './lib/keyboard'
 import { BoardPage } from './pages/BoardPage'
 import { NotFoundPage } from './pages/NotFoundPage'
 
@@ -54,6 +55,19 @@ function App() {
     setDeleted(null)
   }
 
+  // "N" opens the add form from any page, unless a dialog is already open or you're typing.
+  const dialogOpen = editing !== null
+  useEffect(() => {
+    if (dialogOpen) return
+    const onKey = (e: KeyboardEvent) => {
+      if (!isShortcut(e, 'n')) return
+      e.preventDefault()
+      setEditing({ mode: 'add' })
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [dialogOpen])
+
   // Stable identity, so the toast's 8-second timer isn't restarted on every render.
   const dismissUndo = useCallback(() => setDeleted(null), [])
 
@@ -74,6 +88,8 @@ function App() {
             type="button"
             onClick={openAdd}
             aria-label="Add application"
+            aria-keyshortcuts="N"
+            title="Add application (N)"
             className="ml-auto rounded-lg bg-ink px-3 py-1.5 text-sm font-medium text-white hover:bg-ink/85 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-applied"
           >
             <span aria-hidden>+ </span>Add<span className="hidden sm:inline"> application</span>

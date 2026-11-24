@@ -13,6 +13,7 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { CardBody } from '../components/ApplicationCard'
 import { BoardColumn } from '../components/BoardColumn'
 import { needsFollowUp } from '../lib/dates'
+import { isShortcut } from '../lib/keyboard'
 import { sampleApplications } from '../lib/sampleData'
 import { useApplications } from '../store/applications'
 import { STATUSES, STATUS_LABELS, type Application, type Status } from '../types/application'
@@ -31,9 +32,7 @@ export function BoardPage({ onAdd, onEdit }: Props) {
   // "/" jumps to search (as on GitHub), unless you are already typing somewhere.
   useEffect(() => {
     const onKey = (e: globalThis.KeyboardEvent) => {
-      if (e.key !== '/' || e.ctrlKey || e.metaKey || e.altKey) return
-      const el = e.target as HTMLElement
-      if (el.isContentEditable || ['INPUT', 'TEXTAREA', 'SELECT'].includes(el.tagName)) return
+      if (!isShortcut(e, '/')) return
       e.preventDefault()
       searchRef.current?.focus()
     }

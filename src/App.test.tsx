@@ -30,6 +30,21 @@ describe('App: add, edit and delete an application', () => {
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
   })
 
+  it('opens the add form with the N key, but not while typing', async () => {
+    const user = userEvent.setup()
+    renderApp()
+
+    await user.keyboard('n')
+    const dialog = screen.getByRole('dialog', { name: 'Add application' })
+    // Typing "n" inside the form must stay text, not reopen anything.
+    await user.type(within(dialog).getByLabelText('Company'), 'Canva')
+    expect(within(dialog).getByLabelText('Company')).toHaveValue('Canva')
+
+    await user.click(within(dialog).getByRole('button', { name: 'Cancel' }))
+    await user.keyboard('{Control>}n{/Control}')
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+  })
+
   it('edits a card when clicked, then deletes it', async () => {
     const user = userEvent.setup()
     renderApp()
