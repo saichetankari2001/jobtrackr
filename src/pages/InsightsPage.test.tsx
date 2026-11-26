@@ -32,6 +32,10 @@ describe('InsightsPage', () => {
     expect(screen.getByText('Follow-ups due', { selector: 'dt' }).nextElementSibling).toHaveTextContent('2')
     // Sample replies came 2, 4, 5, 6 and 9 days after applying: the median is 5.
     expect(screen.getByText('Median reply time', { selector: 'dt' }).nextElementSibling).toHaveTextContent('5 days')
+    // Sample dates are relative to today, so the exact weekly counts depend on the weekday;
+    // weeklyPace itself is tested with fixed dates in insights.test.ts.
+    expect(screen.getByText('Applied this week', { selector: 'dt' }).nextElementSibling).toHaveTextContent(/^\d+$/)
+    expect(screen.getByText(/^Since Monday\. Last week: \d+$/)).toBeInTheDocument()
 
     expect(screen.getByRole('heading', { name: 'Which resume gets interviews' })).toBeInTheDocument()
     expect(screen.getAllByRole('table')).toHaveLength(3)

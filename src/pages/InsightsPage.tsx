@@ -2,7 +2,7 @@ import { useMemo } from 'react'
 import { Link } from 'react-router-dom'
 import { RateChart } from '../components/charts/RateChart'
 import { StatusChart } from '../components/charts/StatusChart'
-import { formatPercent, rateBy, replyTime, statusCounts, summarize } from '../lib/insights'
+import { formatPercent, rateBy, replyTime, statusCounts, summarize, weeklyPace } from '../lib/insights'
 import { useApplications } from '../store/applications'
 
 export function InsightsPage() {
@@ -13,13 +13,14 @@ export function InsightsPage() {
     () => ({
       summary: summarize(applications),
       replies: replyTime(applications),
+      pace: weeklyPace(applications),
       byResume: rateBy(applications, (a) => a.resumeVersion),
       byRole: rateBy(applications, (a) => a.roleType),
       byStatus: statusCounts(applications),
     }),
     [applications],
   )
-  const { summary, replies } = insights
+  const { summary, replies, pace } = insights
 
   if (summary.applied === 0) {
     return (
@@ -43,8 +44,9 @@ export function InsightsPage() {
       <h1 className="font-display text-2xl font-semibold">Insights</h1>
       <p className="mt-1 text-sm text-muted">Based on {summary.applied} applications you have sent. Saved jobs are not counted.</p>
 
-      <dl className="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
+      <dl className="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
         <Stat label="Applications sent" value={String(summary.applied)} />
+        <Stat label="Applied this week" value={String(pace.thisWeek)} hint={`Since Monday. Last week: ${pace.lastWeek}`} />
         <Stat label="Response rate" value={formatPercent(summary.responseRate)} hint="Got any reply: interview, offer or rejection" />
         <Stat label="Interview rate" value={formatPercent(summary.interviewRate)} hint="Now at Interview or Offer" />
         <Stat

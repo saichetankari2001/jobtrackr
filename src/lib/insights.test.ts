@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { createApplication } from '../store/applications'
 import type { ApplicationInput, Status } from '../types/application'
-import { rateBy, replyTime, statusCounts, summarize } from './insights'
+import { rateBy, replyTime, statusCounts, summarize, weeklyPace } from './insights'
 
 const now = new Date(2026, 10, 20)
 
@@ -84,3 +84,22 @@ describe('replyTime', () => {
   })
 })
 
+describe('weeklyPace', () => {
+  const apps = [
+    make('applied', { dateApplied: '2026-11-16' }), // Monday: first day of this week
+    make('interview', { dateApplied: '2026-11-20' }), // today (Friday)
+    make('saved', { dateApplied: '2026-11-18' }), // saved, not sent: never counted
+    make('applied', { dateApplied: '2026-11-15' }), // Sunday: last day of last week
+    make('rejected', { dateApplied: '2026-11-09' }), // Monday last week
+    make('applied', { dateApplied: '2026-11-08' }), // two weeks ago
+  ]
+
+  it('counts applications sent this week and last week, with weeks starting on Monday', () => {
+    expect(weeklyPace(apps, now)).toEqual({ thisWeek: 2, lastWeek: 2 })
+  })
+
+  it('treats Sunday as the end of the week, not the start of a new one', () => {
+    expect(weeklyPace(apps, new Date(2026, 10, 22, 23, 30))).toEqual({ thisWeek: 2, lastWeek: 2 })
+    expect(weeklyPace(apps, new Date(2026, 10, 23))).toEqual({ thisWeek: 0, lastWeek: 2 })
+  })
+})

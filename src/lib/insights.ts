@@ -1,5 +1,5 @@
 import { STATUSES, STATUS_LABELS, type Application, type Status } from '../types/application'
-import { daysSince, needsFollowUp } from './dates'
+import { daysSince, needsFollowUp, toISODate } from './dates'
 
 // Below this many applications, a percentage is too noisy to trust, so the UI labels it.
 export const SMALL_SAMPLE = 3
@@ -66,6 +66,18 @@ export const replyTime = (apps: Application[]): ReplyTime => {
   const mid = Math.floor(days.length / 2)
   const median = days.length % 2 ? days[mid] : (days[mid - 1] + days[mid]) / 2
   return { medianDays: Math.round(median), replies: days.length }
+}
+
+export type WeeklyPace = { thisWeek: number; lastWeek: number }
+
+// Applications sent this calendar week and last, weeks starting on Monday (as in Australia).
+export const weeklyPace = (apps: Application[], now = new Date()): WeeklyPace => {
+  const sinceMonday = (now.getDay() + 6) % 7 // Monday → 0 … Sunday → 6
+  const day = (offset: number) => toISODate(new Date(now.getFullYear(), now.getMonth(), now.getDate() - sinceMonday + offset))
+  const [lastStart, thisStart, nextStart] = [day(-7), day(0), day(7)]
+  // ISO dates (YYYY-MM-DD) sort as text in date order, so plain string comparison is enough.
+  const count = (from: string, to: string) => apps.filter((a) => wasSent(a) && a.dateApplied >= from && a.dateApplied < to).length
+  return { thisWeek: count(thisStart, nextStart), lastWeek: count(lastStart, thisStart) }
 }
 
 export const formatPercent = (value: number) => `${Math.round(value * 100)}%`
