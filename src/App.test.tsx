@@ -45,6 +45,25 @@ describe('App: add, edit and delete an application', () => {
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
   })
 
+  it('lists the keyboard shortcuts with ? or the header button', async () => {
+    const user = userEvent.setup()
+    renderApp()
+
+    await user.keyboard('?')
+    const dialog = screen.getByRole('dialog', { name: 'Keyboard shortcuts' })
+    expect(within(dialog).getByText('Add an application')).toBeInTheDocument()
+    expect(within(dialog).getByText('Search the board')).toBeInTheDocument()
+
+    await user.click(within(dialog).getByRole('button', { name: 'Close' }))
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+
+    await user.click(screen.getByRole('button', { name: 'Keyboard shortcuts' }))
+    expect(screen.getByRole('dialog', { name: 'Keyboard shortcuts' })).toBeInTheDocument()
+    // "N" must not open a second dialog on top of this one.
+    await user.keyboard('n')
+    expect(screen.queryByRole('dialog', { name: 'Add application' })).not.toBeInTheDocument()
+  })
+
   it('edits a card when clicked, then deletes it', async () => {
     const user = userEvent.setup()
     renderApp()
