@@ -14,7 +14,7 @@ I built it for my own graduate job search: my inbox told me *what* happened to e
 - **Search.** Filter the board by company or role as you type. Press `/` to jump to search, `Esc` to clear it, and `N` on any page to add an application. Press `?` (or the ? button) to see every shortcut.
 - **Follow-up flags.** Anything still in Applied after 14 days is highlighted, so no application goes quiet unnoticed. One click on the follow-up count shows only those cards.
 - **Resume version tracking.** Record which tailored resume you sent to each company.
-- **Insights.** Median reply time, response rate, interview rate, and interview rate by resume version and role type. Small samples are marked so one lucky application doesn't read as "100% success".
+- **Insights.** Applications sent this week (compared with last week), median reply time, response rate, interview rate, and interview rate by resume version and role type. Small samples are marked so one lucky application doesn't read as "100% success".
 - **AI follow-up emails, powered by [Matilda](https://maincode.com/matilda/api).** For an application with no reply, Matilda drafts a short follow-up email you can review and copy. Only the company, role and date are sent; your notes never leave the browser.
 - **Backup.** Export and import your data as JSON. Imports are validated and merged, never overwritten blindly.
 - **Duplicate warning.** Adding a job you already track (same company and role, or same job link) shows a warning, so you don't apply twice by accident.
@@ -36,7 +36,7 @@ I built it for my own graduate job search: my inbox told me *what* happened to e
 | Forms | React Hook Form + Zod | One Zod schema is both the TypeScript type and the validation rules |
 | Drag and drop | dnd-kit | Maintained, and supports keyboard and screen readers |
 | Charts | Recharts, lazy-loaded | Only downloaded when Insights is opened |
-| Testing | Vitest + Testing Library | 72 unit and component tests, including full user flows |
+| Testing | Vitest + Testing Library | 79 unit and component tests, including full user flows and keyboard drag and drop |
 | AI | Matilda API (`@maincode-ai/matilda-client-sdk`), called server-side | Australian-made model. The API key lives on the server, never in the browser |
 | CI | GitHub Actions | Every push is linted, tested and built on a clean machine |
 

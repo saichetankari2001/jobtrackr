@@ -1,7 +1,7 @@
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import { serializeBackup } from '../lib/backup'
+import { parseBackup, serializeBackup } from '../lib/backup'
 import { sampleApplications } from '../lib/sampleData'
 import { useApplications } from '../store/applications'
 import { DataControls } from './DataControls'
@@ -32,6 +32,25 @@ describe('DataControls', () => {
     expect(await blob.text()).toContain('Company,Job title,Status')
     expect((click.mock.contexts[0] as HTMLAnchorElement).download).toMatch(/^jobtrackr-\d{4}-\d{2}-\d{2}\.csv$/)
     expect(screen.getByText('Exported 9 applications as CSV.')).toBeInTheDocument()
+    vi.restoreAllMocks()
+  })
+
+  it('downloads a JSON backup that can be imported again', async () => {
+    useApplications.setState({ applications: sampleApplications() })
+    const createUrl = vi.spyOn(URL, 'createObjectURL').mockReturnValue('blob:test')
+    vi.spyOn(URL, 'revokeObjectURL').mockImplementation(() => {})
+    const click = vi.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(() => {})
+    const user = userEvent.setup()
+    render(<DataControls />)
+
+    await user.click(screen.getByRole('button', { name: 'Export backup' }))
+
+    const blob = createUrl.mock.calls[0][0] as Blob
+    expect(blob.type).toBe('application/json')
+    const restored = parseBackup(await blob.text())
+    expect(restored.ok && restored.applications).toEqual(useApplications.getState().applications)
+    expect((click.mock.contexts[0] as HTMLAnchorElement).download).toMatch(/^jobtrackr-backup-\d{4}-\d{2}-\d{2}\.json$/)
+    expect(screen.getByText('Exported 9 applications.')).toBeInTheDocument()
     vi.restoreAllMocks()
   })
 

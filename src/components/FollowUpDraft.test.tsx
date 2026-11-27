@@ -48,6 +48,15 @@ describe('FollowUpDraft', () => {
     expect(await screen.findByText('AI drafting is not set up on this server.')).toBeInTheDocument()
   })
 
+  it('says the server could not be reached when the request fails (offline)', async () => {
+    vi.spyOn(globalThis, 'fetch').mockRejectedValue(new TypeError('Failed to fetch'))
+    const user = userEvent.setup()
+    render(<FollowUpDraft app={app} />)
+    await user.click(screen.getByRole('button', { name: 'Draft follow-up email' }))
+
+    expect(await screen.findByText('Could not reach the server. Check your connection and try again.')).toBeInTheDocument()
+  })
+
   it('explains when the site has no API (static hosting returns 404)', async () => {
     mockFetch(404, {})
     const user = userEvent.setup()
